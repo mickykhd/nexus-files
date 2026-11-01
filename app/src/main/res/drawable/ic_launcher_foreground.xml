@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Folder glyph -->
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M30,36h14l5,6h25a5,5 0,0 1,5 5v22a5,5 0,0 1,-5 5H30a5,5 0,0 1,-5 -5V41a5,5 0,0 1,5 -5z" />
+    <path
+        android:fillColor="#00363D"
+        android:pathData="M31,50h46v18a4,4 0,0 1,-4 4H35a4,4 0,0 1,-4 -4z" />
+    <!-- Shield accent -->
+    <path
+        android:fillColor="#22EF7E"
+        android:pathData="M72,30l10,4v8c0,6 -4,11 -10,13c-6,-2 -10,-7 -10,-13v-8z" />
+</vector>

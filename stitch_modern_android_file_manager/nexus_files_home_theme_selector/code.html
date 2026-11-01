@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Nexus Files - Storage Overview &amp; Appearance</title>
+<!-- Google Fonts: Inter & Roboto Flex -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Roboto+Flex:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS with Forms and Container Queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-secondary-fixed": "#00201a",
+            "surface-variant": "#30353e",
+            "surface-container": "#1b2028",
+            "on-surface": "#dee2ee",
+            "on-secondary-fixed-variant": "#005145",
+            "surface-bright": "#343942",
+            "on-tertiary-container": "#006731",
+            "tertiary-fixed-dim": "#00e475",
+            "primary-fixed": "#9cf0ff",
+            "inverse-on-surface": "#2c3139",
+            "background": "#0f141c",
+            "error": "#ffb4ab",
+            "on-surface-variant": "#bac9cc",
+            "primary-fixed-dim": "#00daf3",
+            "tertiary-fixed": "#62ff96",
+            "surface-container-high": "#252a33",
+            "on-tertiary-fixed": "#00210b",
+            "outline-variant": "#3b494c",
+            "surface-tint": "#00daf3",
+            "on-secondary-container": "#00463b",
+            "on-primary-fixed-variant": "#004f58",
+            "on-primary-fixed": "#001f24",
+            "error-container": "#93000a",
+            "secondary-fixed-dim": "#44ddc1",
+            "secondary": "#44ddc1",
+            "secondary-container": "#00bea4",
+            "inverse-primary": "#006875",
+            "primary-container": "#00e5ff",
+            "on-primary": "#00363d",
+            "on-secondary": "#00382f",
+            "outline": "#849396",
+            "on-primary-container": "#00626e",
+            "surface-container-low": "#171c24",
+            "secondary-fixed": "#68fadd",
+            "tertiary": "#b1ffbf",
+            "surface-dim": "#0f141c",
+            "on-tertiary": "#003918",
+            "primary": "#c3f5ff",
+            "on-tertiary-fixed-variant": "#005226",
+            "on-background": "#dee2ee",
+            "surface-container-highest": "#30353e",
+            "on-error-container": "#ffdad6",
+            "surface": "#0f141c",
+            "surface-container-lowest": "#090e16",
+            "on-error": "#690005",
+            "inverse-surface": "#dee2ee",
+            "tertiary-container": "#22ef7e"
+          },
+          "borderRadius": {
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter-desktop": "1.5rem",
+            "space-xl": "2rem",
+            "gutter-tablet": "1.25rem",
+            "gutter": "1rem",
+            "space-md": "1rem",
+            "margin-tablet": "1.5rem",
+            "margin": "1rem",
+            "space-sm": "0.5rem",
+            "space-xs": "0.25rem",
+            "space-lg": "1.5rem",
+            "margin-desktop": "2rem"
+          },
+          "fontFamily": {
+            "body-lg": ["Inter"],
+            "display-md": ["Roboto Flex"],
+            "body-md": ["Inter"],
+            "headline-md": ["Roboto Flex"],
+            "headline-sm": ["Roboto Flex"],
+            "title-md": ["Roboto Flex"],
+            "headline-lg-mobile": ["Roboto Flex"],
+            "title-lg": ["Roboto Flex"],
+            "display-lg": ["Roboto Flex"],
+            "body-sm": ["Inter"],
+            "label-sm": ["Inter"],
+            "headline-lg": ["Roboto Flex"],
+            "label-lg": ["Inter"],
+            "label-md": ["Inter"]
+          },
+          "fontSize": {
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0.25px", "fontWeight": "400" }],
+            "display-md": ["44px", { "lineHeight": "52px", "letterSpacing": "0px", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.25px", "fontWeight": "400" }],
+            "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "0px", "fontWeight": "600" }],
+            "headline-sm": ["20px", { "lineHeight": "26px", "letterSpacing": "0.15px", "fontWeight": "500" }],
+            "title-md": ["16px", { "lineHeight": "22px", "letterSpacing": "0.15px", "fontWeight": "500" }],
+            "headline-lg-mobile": ["26px", { "lineHeight": "32px", "letterSpacing": "0px", "fontWeight": "600" }],
+            "title-lg": ["18px", { "lineHeight": "24px", "letterSpacing": "0.15px", "fontWeight": "600" }],
+            "display-lg": ["56px", { "lineHeight": "64px", "letterSpacing": "-0.25px", "fontWeight": "700" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.4px", "fontWeight": "400" }],
+            "label-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.5px", "fontWeight": "600" }],
+            "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "0px", "fontWeight": "600" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.1px", "fontWeight": "600" }],
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "600" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      line-height: 1;
+      display: inline-block;
+      user-select: none;
+    }
+    .material-symbols-fill {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    /* Smooth custom scrollbars */
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    * {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-body-md text-body-md antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- Desktop Tri-Pane / Tablet Dual-Pane Wrapper -->
+<div class="flex-1 flex flex-col md:flex-row w-full max-w-[1600px] mx-auto min-h-screen relative overflow-x-hidden">
+<!-- DESKTOP / TABLET PERSISTENT NAVIGATION DRAWER (Shared Component) -->
+<aside class="hidden md:flex flex-col h-full w-72 p-4 bg-surface-container-low text-on-surface shrink-0 z-40 border-r border-outline-variant/10">
+<!-- Profile / Brand Header -->
+<div class="flex items-center gap-3 px-2 py-4 mb-4">
+<div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-container to-secondary flex items-center justify-center text-on-primary font-headline-md text-headline-md font-semibold shadow-md">
+<span class="material-symbols-outlined" data-icon="folder_zip">folder_zip</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm font-semibold text-primary">Nexus Files</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Storage Manager</span>
+<span class="font-label-sm text-label-sm text-secondary-fixed-dim mt-0.5">Internal: 64% used</span>
+</div>
+</div>
+<!-- Navigation Drawer Links -->
+<nav class="flex flex-col gap-1.5 flex-1">
+<!-- Active Tab: Overview -->
+<a class="flex items-center gap-3 bg-secondary-container text-on-secondary-container rounded-full px-4 py-3 font-title-md text-title-md transition-transform duration-150 active:scale-98" href="#overview">
+<span class="material-symbols-outlined material-symbols-fill" data-icon="dashboard">dashboard</span>
+<span>Overview</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-high rounded-full px-4 py-3 font-title-md text-title-md transition-colors duration-150 active:scale-98" href="#files">
+<span class="material-symbols-outlined" data-icon="folder">folder</span>
+<span>Files</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-high rounded-full px-4 py-3 font-title-md text-title-md transition-colors duration-150 active:scale-98" href="#clean">
+<span class="material-symbols-outlined" data-icon="cleaning_services">cleaning_services</span>
+<span>Clean</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-high rounded-full px-4 py-3 font-title-md text-title-md transition-colors duration-150 active:scale-98" href="#vault">
+<span class="material-symbols-outlined" data-icon="lock">lock</span>
+<span>Vault</span>
+</a>
+</nav>
+<!-- Sidebar Bottom Appearance Trigger -->
+<div class="mt-auto p-3 rounded-2xl bg-surface-container flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-primary-container" data-icon="palette">palette</span>
+<span class="font-title-md text-title-md text-on-surface">Theme</span>
+</div>
+<button class="px-3 py-1.5 rounded-full bg-surface-container-high text-primary hover:bg-surface-bright text-label-md font-label-md transition-colors" id="desktopThemeTrigger">
+          Configure
+        </button>
+</div>
+</aside>
+<!-- MAIN SCROLLABLE CONTENT CANVAS -->
+<main class="flex-1 flex flex-col min-w-0 pb-28 md:pb-8">
+<!-- ANDROID SYSTEM STATUS BAR (Mobile Only) -->
+<div class="flex md:hidden items-center justify-between px-6 pt-3 pb-1 text-on-surface-variant font-label-md text-label-md select-none">
+<span class="font-medium text-on-surface tracking-tight">9:41</span>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[17px]" data-icon="signal_cellular_4_bar">signal_cellular_4_bar</span>
+<span class="material-symbols-outlined text-[17px]" data-icon="wifi">wifi</span>
+<span class="material-symbols-outlined text-[19px] rotate-90" data-icon="battery_full">battery_full</span>
+</div>
+</div>
+<!-- TOP APP BAR (Shared Component) & Google Pixel Search Pill -->
+<header class="bg-surface text-on-surface flex justify-between items-center w-full px-4 pt-1 pb-3 h-16 max-w-full">
+<div class="flex items-center gap-2">
+<!-- Leading icon (Menu on Mobile) -->
+<button aria-label="Menu" class="md:hidden p-2 rounded-full hover:bg-surface-container-high text-on-surface active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg font-semibold text-primary tracking-tight">
+            Nexus Files
+          </h1>
+</div>
+<!-- Trailing actions: Quick Theme Toggle & Avatar -->
+<div class="flex items-center gap-2">
+<!-- Quick Theme Toggle Pill Button -->
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-primary active:scale-95 transition-all" id="quickThemeBtn" title="Toggle Theme Panel">
+<span class="material-symbols-outlined text-[18px]" data-icon="palette">palette</span>
+<span class="hidden sm:inline font-label-md text-label-md">Theme</span>
+</button>
+<!-- User Avatar -->
+<div class="w-9 h-9 rounded-full ring-2 ring-outline-variant/30 overflow-hidden bg-surface-container-high flex items-center justify-center cursor-pointer active:scale-95 transition-transform" title="User Profile Avatar">
+<img class="w-full h-full object-cover" data-alt="Stylized modern cybernetic user avatar portrait with illuminated cyan circuit elements in a dark sleek techno-minimalist backdrop, corporate expressive digital identity photograph." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBrq5CwCGjXEktyNJEOU3zNaa8rToMCtdHKBYUbi4jwl8vtRf819ELOtUO0yCgONPaDHTnHEuRAXOlQiaqEgroBsX1IL1H6lXsuG6oCnveq8V-BYBHu203kYJrsXHWMZHEv4ii5aaquMuc-2PEFLh6DXRbI9zh66A6t3xiU0BT0g0BRFODiFBqqkaXH2Hl1L4kMIgz01v_3fKyT9TrVXBjNoKjh7nr0Bc5B4-ov1PQ"/>
+</div>
+</div>
+</header>
+<!-- SEARCH BAR (Pixel Pill Style) -->
+<div class="px-4 py-2">
+<div class="w-full h-12 rounded-full bg-surface-container hover:bg-surface-container-high transition-colors flex items-center px-4 gap-3 shadow-inner">
+<span class="material-symbols-outlined text-outline" data-icon="search">search</span>
+<input class="bg-transparent border-none outline-none focus:ring-0 flex-1 text-on-surface placeholder:text-outline font-body-md text-body-md" placeholder="Search 24,819 files, APKs, downloads..." type="text"/>
+<button aria-label="Voice Search" class="text-on-surface-variant hover:text-primary transition-colors p-1">
+<span class="material-symbols-outlined" data-icon="mic">mic</span>
+</button>
+<button aria-label="Google Lens" class="text-on-surface-variant hover:text-primary transition-colors p-1">
+<span class="material-symbols-outlined" data-icon="center_focus_weak">center_focus_weak</span>
+</button>
+</div>
+</div>
+<!-- SCROLLABLE BODY CONTENT -->
+<div class="flex-1 px-4 py-3 space-y-6">
+<!-- INTERNAL STORAGE HERO CARD (Bento Accent) -->
+<div class="bg-surface-container-low rounded-3xl p-5 border border-outline-variant/10 shadow-sm relative overflow-hidden">
+<!-- Background Ambient Glow -->
+<div class="absolute -right-16 -top-16 w-52 h-52 bg-primary-container/10 rounded-full blur-3xl pointer-events-none"></div>
+<div class="flex items-start justify-between mb-3 relative z-10">
+<div class="flex items-center gap-3">
+<div class="w-11 h-11 rounded-2xl bg-primary-container/20 text-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[24px]" data-icon="phone_android">phone_android</span>
+</div>
+<div>
+<h2 class="font-title-lg text-title-lg text-on-surface">Internal Storage</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Pixel 8 Pro • Android 14</p>
+</div>
+</div>
+<div class="text-right">
+<div class="font-headline-md text-headline-md text-primary font-bold tracking-tight">61%</div>
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Used</span>
+</div>
+</div>
+<!-- Numerical Readout -->
+<div class="flex items-baseline justify-between mb-3">
+<div class="flex items-baseline gap-1">
+<span class="font-headline-lg-mobile text-headline-lg-mobile font-semibold text-on-surface">78.4</span>
+<span class="font-body-md text-body-md text-on-surface-variant">GB used</span>
+</div>
+<span class="font-body-md text-body-md text-outline">128.0 GB total</span>
+</div>
+<!-- Color Coded Progress Bar Track -->
+<div class="w-full h-3 rounded-full bg-surface-container-highest flex overflow-hidden p-0.5 gap-0.5">
+<!-- Apps (Electric Cyan: 28%) -->
+<div class="bg-primary-container rounded-full h-full" style="width: 28%;" title="Apps: 35.8 GB"></div>
+<!-- Media (Material Teal / Secondary: 21%) -->
+<div class="bg-secondary rounded-full h-full" style="width: 21%;" title="Media: 26.8 GB"></div>
+<!-- System (Surface Variant High: 9%) -->
+<div class="bg-outline rounded-full h-full" style="width: 9%;" title="System: 11.5 GB"></div>
+<!-- Trash (Tertiary / Green: 3%) -->
+<div class="bg-tertiary-container rounded-full h-full" style="width: 3%;" title="Trash: 4.3 GB"></div>
+</div>
+<!-- Category Breakdown Badges -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4 pt-3 border-t border-outline-variant/10 text-label-md font-label-md">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-primary-container"></span>
+<span class="text-on-surface">Apps</span>
+<span class="text-on-surface-variant ml-auto">35.8 GB</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary"></span>
+<span class="text-on-surface">Media</span>
+<span class="text-on-surface-variant ml-auto">26.8 GB</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-outline"></span>
+<span class="text-on-surface">System</span>
+<span class="text-on-surface-variant ml-auto">11.5 GB</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-tertiary-container"></span>
+<span class="text-on-surface">Trash</span>
+<span class="text-on-surface-variant ml-auto">4.3 GB</span>
+</div>
+</div>
+</div>
+<!-- SECONDARY STORAGE CARDS: SD CARD & CLOUD -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+<!-- Google Drive Linked Card -->
+<div class="bg-surface-container rounded-2xl p-4 border border-outline-variant/10 flex items-center justify-between hover:bg-surface-container-high transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-surface-container-highest flex items-center justify-center text-secondary group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined" data-icon="cloud">cloud</span>
+</div>
+<div>
+<div class="flex items-center gap-1.5">
+<h3 class="font-title-md text-title-md text-on-surface">Google Drive</h3>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">84.2 GB of 100 GB used</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors" data-icon="chevron_right">chevron_right</span>
+</div>
+<!-- OneDrive Connect Option -->
+<div class="bg-surface-container rounded-2xl p-4 border border-dashed border-outline-variant/30 flex items-center justify-between hover:bg-surface-container-high transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-surface-container-low flex items-center justify-center text-outline group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+</div>
+<div>
+<h3 class="font-title-md text-title-md text-on-surface">Add OneDrive / SD</h3>
+<p class="font-body-sm text-body-sm text-outline">Link cloud account or mount SD</p>
+</div>
+</div>
+<button class="px-3 py-1 rounded-full bg-primary-container text-on-primary font-label-md text-label-md group-hover:brightness-105 transition-all">
+              Link
+            </button>
+</div>
+</div>
+<!-- CATEGORIES QUICK ACCESS GRID (Material You squircle chips) -->
+<div>
+<div class="flex items-center justify-between mb-3">
+<h2 class="font-title-lg text-title-lg text-on-surface font-semibold">Categories</h2>
+<button class="font-label-md text-label-md text-primary hover:underline">View All</button>
+</div>
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+<!-- Downloads with Badge -->
+<div class="bg-surface-container hover:bg-surface-container-high transition-transform active:scale-95 p-3 rounded-2xl border border-outline-variant/10 flex items-center gap-3 cursor-pointer relative">
+<div class="w-10 h-10 rounded-xl bg-primary-container/20 text-primary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined" data-icon="download">download</span>
+</div>
+<div class="min-w-0 flex-1">
+<div class="flex items-center gap-1.5">
+<span class="font-title-md text-title-md text-on-surface truncate">Downloads</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant block">4.2 GB</span>
+</div>
+<span class="absolute top-2 right-2 px-1.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-bold">12 new</span>
+</div>
+<!-- Images -->
+<div class="bg-surface-container hover:bg-surface-container-high transition-transform active:scale-95 p-3 rounded-2xl border border-outline-variant/10 flex items-center gap-3 cursor-pointer">
+<div class="w-10 h-10 rounded-xl bg-secondary/20 text-secondary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined" data-icon="image">image</span>
+</div>
+<div class="min-w-0">
+<span class="font-title-md text-title-md text-on-surface truncate block">Images</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">14.8 GB</span>
+</div>
+</div>
+<!-- Videos -->
+<div class="bg-surface-container hover:bg-surface-container-high transition-transform active:scale-95 p-3 rounded-2xl border border-outline-variant/10 flex items-center gap-3 cursor-pointer">
+<div class="w-10 h-10 rounded-xl bg-primary/20 text-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined" data-icon="movie">movie</span>
+</div>
+<div class="min-w-0">
+<span class="font-title-md text-title-md text-on-surface truncate block">Videos</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">8.9 GB</span>
+</div>
+</div>
+<!-- Audio -->
+<div class="bg-surface-container hover:bg-surface-container-high transition-transform active:scale-95 p-3 rounded-2xl border border-outline-variant/10 flex items-center gap-3 cursor-pointer">
+<div class="w-10 h-10 rounded-xl bg-tertiary-container/20 text-tertiary-fixed-dim flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined" data-icon="music_note">music_note</span>
+</div>
+<div class="min-w-0">
+<span class="font-title-md text-title-md text-on-surface truncate block">Audio</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">3.1 GB</span>
+</div>
+</div>
+<!-- Documents -->
+<div class="bg-surface-container hover:bg-surface-container-high transition-transform active:scale-95 p-3 rounded-2xl border border-outline-variant/10 flex items-center gap-3 cursor-pointer">
+<div class="w-10 h-10 rounded-xl bg-outline-variant/40 text-on-surface flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+</div>
+<div class="min-w-0">
+<span class="font-title-md text-title-md text-on-surface truncate block">Documents</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">1.4 GB</span>
+</div>
+</div>
+<!-- APKs -->
+<div class="bg-surface-container hover:bg-surface-container-high transition-transform active:scale-95 p-3 rounded-2xl border border-outline-variant/10 flex items-center gap-3 cursor-pointer">
+<div class="w-10 h-10 rounded-xl bg-secondary-fixed/20 text-secondary-fixed-dim flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined" data-icon="android">android</span>
+</div>
+<div class="min-w-0">
+<span class="font-title-md text-title-md text-on-surface truncate block">APKs</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">840 MB</span>
+</div>
+</div>
+<!-- Archives -->
+<div class="bg-surface-container hover:bg-surface-container-high transition-transform active:scale-95 p-3 rounded-2xl border border-outline-variant/10 flex items-center gap-3 cursor-pointer">
+<div class="w-10 h-10 rounded-xl bg-primary-container/20 text-primary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+</div>
+<div class="min-w-0">
+<span class="font-title-md text-title-md text-on-surface truncate block">Archives</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">2.6 GB</span>
+</div>
+</div>
+<!-- Large Files -->
+<div class="bg-surface-container hover:bg-surface-container-high transition-transform active:scale-95 p-3 rounded-2xl border border-outline-variant/10 flex items-center gap-3 cursor-pointer">
+<div class="w-10 h-10 rounded-xl bg-error/20 text-error flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined" data-icon="warning">warning</span>
+</div>
+<div class="min-w-0">
+<span class="font-title-md text-title-md text-on-surface truncate block">Large Files</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">&gt; 500 MB</span>
+</div>
+</div>
+</div>
+</div>
+<!-- RECENT FILES CAROUSEL -->
+<div>
+<div class="flex items-center justify-between mb-3">
+<h2 class="font-title-lg text-title-lg text-on-surface font-semibold">Recent Files</h2>
+<div class="flex items-center gap-1">
+<button aria-label="Previous" class="p-1 rounded-full text-on-surface-variant hover:text-on-surface">
+<span class="material-symbols-outlined text-[20px]" data-icon="chevron_left">chevron_left</span>
+</button>
+<button aria-label="Next" class="p-1 rounded-full text-on-surface-variant hover:text-on-surface">
+<span class="material-symbols-outlined text-[20px]" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Horizontal Carousel Track -->
+<div class="flex gap-3 overflow-x-auto pb-2 pt-1 no-scrollbar scroll-smooth">
+<!-- File Item 1: RAW Photo -->
+<div class="w-48 shrink-0 bg-surface-container-low rounded-2xl border border-outline-variant/10 overflow-hidden hover:bg-surface-container transition-all group">
+<div class="h-28 bg-surface-container-highest relative overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Breathtaking wide dynamic range raw architectural photograph of futuristic minimalist glass pavilion surrounded by misty dark pine woods under overcast atmospheric twilight, professional photography aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRIQ0ctbpR-cCo4nIfCoBAbnNRQoZLkBSyyOnUnqZBQdhCKD1aAjaxmGMQSci2cl8S3vWcIaD8kYc4dm_xmIu5OJw_99Hsw4KcZleeTB7-D1v1EKiflnze4_VOSPfRQ1pDJYEZrZM7O9eXh-o9SnraTstBTAzYE0cXwJzdkMNwovj9cTFh_rnCyF-bgYptNKl1IsVUTLVXqau5mkDxdPgqGIsXnbdBESb4Hjzr-7w"/>
+<span class="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-background/80 backdrop-blur text-primary font-label-sm text-label-sm uppercase">DNG RAW</span>
+<button class="absolute top-2 right-2 w-7 h-7 rounded-full bg-background/60 hover:bg-background backdrop-blur text-on-surface flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-[16px]" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<div class="p-3">
+<div class="font-title-md text-title-md text-on-surface truncate font-medium">DSC09412_HDR.dng</div>
+<div class="flex items-center justify-between mt-1 text-on-surface-variant font-body-sm text-body-sm">
+<span>34.2 MB</span>
+<span>10m ago</span>
+</div>
+</div>
+</div>
+<!-- File Item 2: Build APK -->
+<div class="w-48 shrink-0 bg-surface-container-low rounded-2xl border border-outline-variant/10 overflow-hidden hover:bg-surface-container transition-all group">
+<div class="h-28 bg-surface-container flex items-center justify-center relative">
+<div class="w-14 h-14 rounded-2xl bg-secondary-container/20 text-secondary flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[32px]" data-icon="adb">adb</span>
+</div>
+<span class="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-background/80 backdrop-blur text-secondary font-label-sm text-label-sm uppercase">APK</span>
+<button class="absolute top-2 right-2 w-7 h-7 rounded-full bg-background/60 hover:bg-background backdrop-blur text-on-surface flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-[16px]" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<div class="p-3">
+<div class="font-title-md text-title-md text-on-surface truncate font-medium">nexus_v2.4.0-rc1.apk</div>
+<div class="flex items-center justify-between mt-1 text-on-surface-variant font-body-sm text-body-sm">
+<span>48.9 MB</span>
+<span>1h ago</span>
+</div>
+</div>
+</div>
+<!-- File Item 3: 4K Render Clip -->
+<div class="w-48 shrink-0 bg-surface-container-low rounded-2xl border border-outline-variant/10 overflow-hidden hover:bg-surface-container transition-all group">
+<div class="h-28 bg-surface-container-highest relative overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="High quality dynamic screenshot of high-framerate sci-fi 3D render containing glowing cyan data particles in high-contrast volumetric dark space, rendered cinematic lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWfGS0n_UApA8fn_-g1twu4OiV9dv5HlmqAyLpVha2e5QmvDJNaL3n1yKy-x1QCzhueirChxvU8udfvS_WrfHs3KHZOW7hiLRotpwW-1znxckPQdoh-jls7JMgaNeSI6vThvx2KuHvs7F_QubkqsRYZyDmAeXfPOkem4tVWWHnVMaJiw_v8c2fkcXvzu804PXtj6DereIkP-0ChkqRJK9sV8BegcwgweA67V0VmCY"/>
+<span class="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-background/80 backdrop-blur text-primary-container font-label-sm text-label-sm uppercase">MP4 4K</span>
+<button class="absolute top-2 right-2 w-7 h-7 rounded-full bg-background/60 hover:bg-background backdrop-blur text-on-surface flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-[16px]" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<div class="p-3">
+<div class="font-title-md text-title-md text-on-surface truncate font-medium">intro_sequence_pro.mp4</div>
+<div class="flex items-center justify-between mt-1 text-on-surface-variant font-body-sm text-body-sm">
+<span>412 MB</span>
+<span>3h ago</span>
+</div>
+</div>
+</div>
+<!-- File Item 4: Zip Archive -->
+<div class="w-48 shrink-0 bg-surface-container-low rounded-2xl border border-outline-variant/10 overflow-hidden hover:bg-surface-container transition-all group">
+<div class="h-28 bg-surface-container flex items-center justify-center relative">
+<div class="w-14 h-14 rounded-2xl bg-primary-container/20 text-primary-container flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[32px]" data-icon="folder_zip">folder_zip</span>
+</div>
+<span class="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-background/80 backdrop-blur text-primary-fixed-dim font-label-sm text-label-sm uppercase">ZIP</span>
+<button class="absolute top-2 right-2 w-7 h-7 rounded-full bg-background/60 hover:bg-background backdrop-blur text-on-surface flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-[16px]" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<div class="p-3">
+<div class="font-title-md text-title-md text-on-surface truncate font-medium">assets_design_tokens.zip</div>
+<div class="flex items-center justify-between mt-1 text-on-surface-variant font-body-sm text-body-sm">
+<span>128 MB</span>
+<span>Yesterday</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- PROMINENT THEME & APPEARANCE ANDROID BOTTOM SHEET (Contextual Overlay) -->
+<!-- Bottom Sheet Backdrop -->
+<div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 transition-opacity duration-300 flex flex-col justify-end" id="themeModalBackdrop">
+<!-- Bottom Sheet Container (M3 Shape: rounded-t-3xl) -->
+<div class="w-full max-w-xl mx-auto bg-surface-container-low border-t border-x border-outline-variant/20 rounded-t-3xl shadow-2xl p-5 pb-8 flex flex-col gap-4 animate-in slide-in-from-bottom duration-300 max-h-[777px] overflow-y-auto" id="themeModalSheet">
+<!-- Drag Handle -->
+<div class="w-10 h-1.5 rounded-full bg-outline-variant/60 mx-auto -mt-1 cursor-grab active:cursor-grabbing"></div>
+<!-- Sheet Header -->
+<div class="flex items-center justify-between pt-1">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]" data-icon="palette">palette</span>
+</div>
+<div>
+<h2 class="font-title-lg text-title-lg font-semibold text-on-surface">Theme &amp; Appearance</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Customize Material You dynamic styling</p>
+</div>
+</div>
+<button aria-label="Close" class="w-8 h-8 rounded-full hover:bg-surface-container-high text-on-surface-variant flex items-center justify-center active:scale-95" id="closeThemeModal">
+<span class="material-symbols-outlined text-[20px]" data-icon="close">close</span>
+</button>
+</div>
+<!-- Theme Modes Radio Options -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-outline uppercase tracking-wider block">Theme Mode</label>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+<!-- Mode 1: Dynamic Material You (Selected) -->
+<div class="theme-mode-card flex items-center justify-between p-3 rounded-2xl bg-secondary-container/20 border-2 border-secondary cursor-pointer transition-all">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-secondary" data-icon="auto_awesome">auto_awesome</span>
+<div>
+<div class="font-title-md text-title-md text-on-surface font-medium leading-snug">Dynamic System</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Wallpaper Matched</span>
+</div>
+</div>
+<div class="w-5 h-5 rounded-full bg-secondary flex items-center justify-center text-on-secondary">
+<span class="material-symbols-outlined text-[14px] font-bold" data-icon="check">check</span>
+</div>
+</div>
+<!-- Mode 2: Pure AMOLED Black -->
+<div class="theme-mode-card flex items-center justify-between p-3 rounded-2xl bg-surface-container border border-outline-variant/20 hover:border-outline-variant cursor-pointer transition-all">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="dark_mode">dark_mode</span>
+<div>
+<div class="font-title-md text-title-md text-on-surface font-medium leading-snug">Pure AMOLED</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">#000000 True Black</span>
+</div>
+</div>
+<div class="w-5 h-5 rounded-full border border-outline"></div>
+</div>
+<!-- Mode 3: Cool Midnight Dark -->
+<div class="theme-mode-card flex items-center justify-between p-3 rounded-2xl bg-surface-container border border-outline-variant/20 hover:border-outline-variant cursor-pointer transition-all">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="nightlight">nightlight</span>
+<div>
+<div class="font-title-md text-title-md text-on-surface font-medium leading-snug">Cool Midnight</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Deep Navy Tint</span>
+</div>
+</div>
+<div class="w-5 h-5 rounded-full border border-outline"></div>
+</div>
+<!-- Mode 4: Clean Crisp Light -->
+<div class="theme-mode-card flex items-center justify-between p-3 rounded-2xl bg-surface-container border border-outline-variant/20 hover:border-outline-variant cursor-pointer transition-all">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="light_mode">light_mode</span>
+<div>
+<div class="font-title-md text-title-md text-on-surface font-medium leading-snug">Crisp Light</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">High Luminance</span>
+</div>
+</div>
+<div class="w-5 h-5 rounded-full border border-outline"></div>
+</div>
+</div>
+</div>
+<!-- Accent Color Swatches -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-outline uppercase tracking-wider block">Color Palette Swatches</label>
+<div class="flex items-center justify-between gap-2 p-2 rounded-2xl bg-surface-container">
+<!-- Electric Cyan (Selected) -->
+<button class="flex-1 flex flex-col items-center gap-1.5 py-1.5 group" title="Electric Cyan">
+<div class="w-9 h-9 rounded-full bg-primary-container ring-2 ring-primary ring-offset-2 ring-offset-surface-container flex items-center justify-center transition-transform group-hover:scale-105">
+<span class="material-symbols-outlined text-on-primary text-[18px]" data-icon="check">check</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary">Cyan</span>
+</button>
+<!-- Cyber Lime -->
+<button class="flex-1 flex flex-col items-center gap-1.5 py-1.5 group" title="Cyber Lime">
+<div class="w-9 h-9 rounded-full bg-tertiary-fixed-dim flex items-center justify-center transition-transform group-hover:scale-105">
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Lime</span>
+</button>
+<!-- Deep Amethyst -->
+<button class="flex-1 flex flex-col items-center gap-1.5 py-1.5 group" title="Deep Amethyst">
+<div class="w-9 h-9 rounded-full bg-indigo-400 flex items-center justify-center transition-transform group-hover:scale-105">
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Amethyst</span>
+</button>
+<!-- Sunset Coral -->
+<button class="flex-1 flex flex-col items-center gap-1.5 py-1.5 group" title="Sunset Coral">
+<div class="w-9 h-9 rounded-full bg-orange-400 flex items-center justify-center transition-transform group-hover:scale-105">
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Coral</span>
+</button>
+<!-- Oceanic Blue -->
+<button class="flex-1 flex flex-col items-center gap-1.5 py-1.5 group" title="Oceanic Blue">
+<div class="w-9 h-9 rounded-full bg-sky-500 flex items-center justify-center transition-transform group-hover:scale-105">
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Ocean</span>
+</button>
+</div>
+</div>
+<!-- Contrast Slider & Monochromatic Icons Toggle -->
+<div class="space-y-4 pt-1">
+<!-- Contrast Level -->
+<div class="bg-surface-container p-3 rounded-2xl flex flex-col gap-2">
+<div class="flex items-center justify-between font-body-sm text-body-sm">
+<span class="text-on-surface font-medium flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]" data-icon="contrast">contrast</span>
+              Surface Contrast
+            </span>
+<span class="text-secondary font-label-md text-label-md">High (Material 3 Expressive)</span>
+</div>
+<input class="w-full accent-secondary bg-surface-container-highest h-2 rounded-full cursor-pointer" max="2" min="0" type="range" value="2"/>
+</div>
+<!-- Themed Monochromatic Icons Toggle -->
+<div class="bg-surface-container p-3 rounded-2xl flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="widgets">widgets</span>
+<div>
+<div class="font-title-md text-title-md text-on-surface font-medium">Monochromatic Icons</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Tint folder icons to palette accent</span>
+</div>
+</div>
+<!-- Styled M3 Switch -->
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-12 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-6 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-on-secondary after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
+</label>
+</div>
+</div>
+<!-- Action Button -->
+<div class="pt-2">
+<button class="w-full py-3 rounded-full bg-primary-container text-on-primary font-label-lg text-label-lg font-semibold hover:brightness-105 active:scale-98 transition-all flex items-center justify-center gap-2 shadow-md" id="applyThemeBtn">
+<span class="material-symbols-outlined text-[18px]" data-icon="done_all">done_all</span>
+          Apply Appearance
+        </button>
+</div>
+</div>
+</div>
+<!-- MOBILE BOTTOM NAVIGATION BAR (Shared Component) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-40 flex justify-around items-center px-4 pb-safe h-20 bg-surface-container text-on-surface shadow-lg border-t border-outline-variant/10">
+<!-- Tab 1: Overview (ACTIVE) -->
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-5 py-1 transition-all duration-200 active:scale-95" href="#overview">
+<span class="material-symbols-outlined material-symbols-fill text-[22px]" data-icon="dashboard">dashboard</span>
+<span class="font-label-md text-label-md font-semibold mt-0.5">Overview</span>
+</a>
+<!-- Tab 2: Files -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-5 py-1 hover:bg-surface-variant/50 transition-all duration-200 active:scale-95" href="#files">
+<span class="material-symbols-outlined text-[22px]" data-icon="folder">folder</span>
+<span class="font-label-md text-label-md mt-0.5">Files</span>
+</a>
+<!-- Tab 3: Clean -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-5 py-1 hover:bg-surface-variant/50 transition-all duration-200 active:scale-95" href="#clean">
+<span class="material-symbols-outlined text-[22px]" data-icon="cleaning_services">cleaning_services</span>
+<span class="font-label-md text-label-md mt-0.5">Clean</span>
+</a>
+<!-- Tab 4: Vault -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-5 py-1 hover:bg-surface-variant/50 transition-all duration-200 active:scale-95" href="#vault">
+<span class="material-symbols-outlined text-[22px]" data-icon="lock">lock</span>
+<span class="font-label-md text-label-md mt-0.5">Vault</span>
+</a>
+</nav>
+<!-- Interactive JavaScript for Modal Toggle & Interaction -->
+<script>
+    const themeModalBackdrop = document.getElementById('themeModalBackdrop');
+    const closeThemeModal = document.getElementById('closeThemeModal');
+    const quickThemeBtn = document.getElementById('quickThemeBtn');
+    const desktopThemeTrigger = document.getElementById('desktopThemeTrigger');
+    const applyThemeBtn = document.getElementById('applyThemeBtn');
+
+    function openModal() {
+      themeModalBackdrop.classList.remove('hidden');
+      themeModalBackdrop.classList.add('flex');
+    }
+
+    function closeModal() {
+      themeModalBackdrop.classList.add('hidden');
+      themeModalBackdrop.classList.remove('flex');
+    }
+
+    quickThemeBtn?.addEventListener('click', openModal);
+    desktopThemeTrigger?.addEventListener('click', openModal);
+    closeThemeModal?.addEventListener('click', closeModal);
+    applyThemeBtn?.addEventListener('click', closeModal);
+
+    // Close on backdrop click
+    themeModalBackdrop.addEventListener('click', (e) => {
+      if (e.target === themeModalBackdrop) {
+        closeModal();
+      }
+    });
+
+    // Theme mode card selector logic
+    const modeCards = document.querySelectorAll('.theme-mode-card');
+    modeCards.forEach(card => {
+      card.addEventListener('click', () => {
+        modeCards.forEach(c => {
+          c.classList.remove('border-2', 'border-secondary', 'bg-secondary-container/20');
+          c.classList.add('bg-surface-container', 'border', 'border-outline-variant/20');
+          const indicator = c.querySelector('.rounded-full:last-child');
+          if (indicator) {
+            indicator.className = 'w-5 h-5 rounded-full border border-outline';
+            indicator.innerHTML = '';
+          }
+        });
+        card.classList.add('border-2', 'border-secondary', 'bg-secondary-container/20');
+        card.classList.remove('bg-surface-container', 'border-outline-variant/20');
+        const indicator = card.querySelector('.rounded-full:last-child');
+        if (indicator) {
+          indicator.className = 'w-5 h-5 rounded-full bg-secondary flex items-center justify-center text-on-secondary';
+          indicator.innerHTML = '<span class="material-symbols-outlined text-[14px] font-bold">check</span>';
+        }
+      });
+    });
+  </script>
+</body></html>

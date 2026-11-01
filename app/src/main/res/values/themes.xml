@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Compose draws the entire UI; this theme only styles the window shell. -->
+    <style name="Theme.NexusFiles" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/nexus_window_bg</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>
