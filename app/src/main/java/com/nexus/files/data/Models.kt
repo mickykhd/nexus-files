@@ -69,6 +69,27 @@ data class StorageCategory(
 
 enum class CategoryColor { SYSTEM, MEDIA, DOCS, SUCCESS, WARNING }
 
+/** A real mounted storage volume (internal or removable). */
+data class StorageVolumeInfo(
+    val name: String,
+    val root: java.io.File,
+    val totalBytes: Long,
+    val freeBytes: Long,
+    val isPrimary: Boolean,
+) {
+    val usedBytes: Long get() = (totalBytes - freeBytes).coerceAtLeast(0L)
+    val usedPercent: Int
+        get() = if (totalBytes <= 0) 0 else ((usedBytes * 100) / totalBytes).toInt().coerceIn(0, 100)
+}
+
+/** Everything the Overview screen shows, computed in a single storage walk. */
+data class OverviewData(
+    val stats: StorageStats,
+    val counts: Map<FileKind, Int>,
+    val recent: List<FileEntry>,
+    val totalFiles: Int,
+)
+
 data class StorageStats(
     val totalBytes: Long,
     val usedBytes: Long,
@@ -108,6 +129,7 @@ object Formats {
         val diff = now - millis
         val day = 24 * 60 * 60 * 1000L
         return when {
+            millis > now + 60 * 1000L -> shortDate(millis) // future deadline/schedule
             diff < 60 * 1000L -> "Just now"
             diff < 60 * 60 * 1000L -> "${diff / (60 * 1000L)} min ago"
             isToday(millis) -> "Today, " + time(millis)

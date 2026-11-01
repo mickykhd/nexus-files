@@ -218,7 +218,9 @@ fun FileInspectorContent(
             InspectorToggleRow(
                 icon = Icons.Rounded.Schedule,
                 title = "Auto-destruct timer",
-                subtitle = "Purge after 48 hours inactivity",
+                subtitle = entry.autoDestructAt?.let {
+                    "Sealed artifact purges ${com.nexus.files.data.Formats.shortDate(it)} ${com.nexus.files.data.Formats.time(it)}"
+                } ?: "Off — artifacts are kept until wiped",
                 checked = autoDestruct,
                 onChange = onAutoDestructChange,
                 modifier = Modifier.enterStagger(5),
@@ -226,7 +228,7 @@ fun FileInspectorContent(
             InspectorToggleRow(
                 icon = Icons.Rounded.Fingerprint,
                 title = "Biometric re-auth",
-                subtitle = "Prompt biometrics before viewing",
+                subtitle = "Ask for fingerprint / PIN before opening",
                 checked = biometricReauth,
                 onChange = onBiometricReauthChange,
                 modifier = Modifier.enterStagger(6),

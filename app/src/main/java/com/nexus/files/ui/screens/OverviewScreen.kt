@@ -21,10 +21,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowForwardIos
-import androidx.compose.material.icons.rounded.Cloud
+import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.Dns
 import androidx.compose.material.icons.rounded.Folder
+import androidx.compose.material.icons.rounded.GetApp
+import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.rounded.Mic
+import androidx.compose.material.icons.rounded.Movie
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.material.icons.rounded.Tune
@@ -96,25 +99,12 @@ fun OverviewScreen(
             }
         }
 
-        // Cloud sources
-        item(key = "gdrive") {
-            SourceRow(
-                icon = Icons.Rounded.Cloud,
-                title = "Google Drive",
-                subtitle = "Synced 2h ago · 15.2 of 100 GB used",
-                progress = 0.152f,
-                tint = Color(0xFF2E9BF0),
-                modifier = Modifier.padding(horizontal = 16.dp).enterStagger(2),
-            )
-        }
-        item(key = "nas") {
-            SourceRow(
-                icon = Icons.Rounded.Dns,
-                title = "NAS · Synology DS920+",
-                subtitle = "Connected · LAN · 2.4 TB free",
-                progress = 0.62f,
-                tint = extra.media,
-                modifier = Modifier.padding(horizontal = 16.dp).enterStagger(3),
+        // Real mounted storage volumes (internal + any SD cards)
+        val volumes = state.volumes
+        itemsIndexed(volumes.filterNot { it.isPrimary }, key = { _, it -> it.root.absolutePath }) { index, vol ->
+            VolumeRow(
+                volume = vol,
+                modifier = Modifier.padding(horizontal = 16.dp).enterStagger(2 + index),
             )
         }
 
@@ -131,7 +121,17 @@ fun OverviewScreen(
             ) {
                 QuickTile("Images", formatCount(quick[com.nexus.files.data.FileKind.IMAGE] ?: 0), Color(0xFFFFB74A), Modifier.weight(1f)) { onQuickAccess(FileFilter.IMAGES) }
                 QuickTile("Videos", formatCount(quick[com.nexus.files.data.FileKind.VIDEO] ?: 0), Color(0xFFFF8A3D), Modifier.weight(1f)) { onQuickAccess(FileFilter.MEDIA) }
-                QuickTile("Docs", formatCount(quick[com.nexus.files.data.FileKind.PDF] ?: 0), extra.docs, Modifier.weight(1f)) { onQuickAccess(FileFilter.DOCS) }
+                QuickTile(
+                    "Docs",
+                    formatCount(
+                        (quick[com.nexus.files.data.FileKind.PDF] ?: 0) +
+                            (quick[com.nexus.files.data.FileKind.DOC] ?: 0) +
+                            (quick[com.nexus.files.data.FileKind.TEXT] ?: 0) +
+                            (quick[com.nexus.files.data.FileKind.PRESENTATION] ?: 0),
+                    ),
+                    extra.docs,
+                    Modifier.weight(1f),
+                ) { onQuickAccess(FileFilter.DOCS) }
                 QuickTile("APKs", formatCount(quick[com.nexus.files.data.FileKind.APK] ?: 0), Color(0xFF2E9BF0), Modifier.weight(1f)) { onQuickAccess(FileFilter.ARCHIVES) }
             }
         }
@@ -308,6 +308,26 @@ private fun LegendEntry(category: com.nexus.files.data.StorageCategory?, modifie
 }
 
 @Composable
+private fun VolumeRow(
+    volume: com.nexus.files.data.StorageVolumeInfo,
+    modifier: Modifier = Modifier,
+) {
+    val extra = LocalNexusExtra.current
+    val used = volume.usedBytes / (1024.0 * 1024 * 1024)
+    val total = volume.totalBytes / (1024.0 * 1024 * 1024)
+    val free = volume.freeBytes / (1024.0 * 1024 * 1024)
+    val tint = extra.media
+    SourceRow(
+        icon = Icons.Rounded.Dns,
+        title = volume.name,
+        subtitle = "${"%.1f".format(free)} GB free of ${"%.1f".format(total)} GB",
+        progress = if (volume.totalBytes <= 0) 0f else volume.usedBytes.toFloat() / volume.totalBytes,
+        tint = tint,
+        modifier = modifier,
+    )
+}
+
+@Composable
 private fun SourceRow(
     icon: ImageVector,
     title: String,
@@ -403,10 +423,10 @@ private fun QuickTile(
 }
 
 private fun iconForLabel(label: String): ImageVector = when (label) {
-    "Images" -> Icons.Rounded.Folder
-    "Videos" -> Icons.Rounded.Folder
-    "Docs" -> Icons.Rounded.Folder
-    else -> Icons.Rounded.Folder
+    "Images" -> Icons.Rounded.Image
+    "Videos" -> Icons.Rounded.Movie
+    "Docs" -> Icons.Rounded.Description
+    else -> Icons.Rounded.GetApp
 }
 
 @Composable

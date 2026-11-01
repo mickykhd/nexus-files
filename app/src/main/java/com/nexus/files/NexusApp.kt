@@ -12,10 +12,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -25,24 +22,30 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.Lifecycle
 import com.nexus.files.data.FileEntry
 import com.nexus.files.data.FileFilter
 import com.nexus.files.data.VaultEntry
 import com.nexus.files.ui.components.NexusBottomSheet
 import com.nexus.files.ui.screens.CleanScreen
-import com.nexus.files.ui.screens.NexusBottomNav as CommonBottomNav
-import com.nexus.files.ui.screens.NexusToast as CommonToast
-import com.nexus.files.ui.screens.NexusTopBar as CommonTopBar
 import com.nexus.files.ui.screens.FileActionsMenu
 import com.nexus.files.ui.screens.FileInspectorContent
 import com.nexus.files.ui.screens.FilesScreen
 import com.nexus.files.ui.screens.NameDialog
+import com.nexus.files.ui.screens.NexusBottomNav
+import com.nexus.files.ui.screens.NexusToast
+import com.nexus.files.ui.screens.NexusTopBar
 import com.nexus.files.ui.screens.OverviewScreen
+import com.nexus.files.ui.screens.PermissionScreen
 import com.nexus.files.ui.screens.PinDialog
+import com.nexus.files.ui.screens.SearchScreen
 import com.nexus.files.ui.screens.ThemeSheetContent
 import com.nexus.files.ui.screens.VaultScreen
 import com.nexus.files.ui.theme.NexusTheme
+import com.nexus.files.util.authenticate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,6 +56,14 @@ fun NexusApp(viewModel: MainViewModel) {
     val clean by viewModel.clean.collectAsState()
     val vault by viewModel.vault.collectAsState()
     val toast by viewModel.toast.collectAsState()
+    val search by viewModel.search.collectAsState()
+    val storageAccess by viewModel.storageAccess.collectAsState()
+    val context = LocalContext.current
+
+    // Real permission state: re-checked every time the app returns to foreground.
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        viewModel.refreshPermissions()
+    }
 
     NexusTheme(
         mode = appearance.mode,
@@ -60,6 +71,20 @@ fun NexusApp(viewModel: MainViewModel) {
         contrast = appearance.contrast,
         monochromeIcons = appearance.monochromeIcons,
     ) {
+        val canvas = com.nexus.files.ui.theme.LocalNexusExtra.current.canvas
+
+        if (!storageAccess) {
+            Column(Modifier.fillMaxSize().background(canvas)) {
+                PermissionScreen(
+                    needsLegacy = viewModel.needsLegacyPermissions(),
+                    onOpenSettings = { context.startActivity(viewModel.storageAccessIntent()) },
+                    onRecheck = { viewModel.refreshPermissions() },
+                )
+            }
+            NexusToast(message = toast, onDone = { viewModel.clearToast() })
+            return@NexusTheme
+        }
+
         var tab by rememberSaveable { mutableStateOf(NexusTab.OVERVIEW) }
         var showThemeSheet by remember { mutableStateOf(false) }
         var menuEntry by remember { mutableStateOf<FileEntry?>(null) }
@@ -67,21 +92,41 @@ fun NexusApp(viewModel: MainViewModel) {
         var showNewFolder by remember { mutableStateOf(false) }
         var inspectorEntry by remember { mutableStateOf<VaultEntry?>(null) }
         var pinMode by remember { mutableStateOf<PinMode?>(null) }
+        var pendingVaultEntry by remember { mutableStateOf<VaultEntry?>(null) }
+        var searchOpen by remember { mutableStateOf(false) }
 
         val themeSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         val inspectorSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-        val canvas = com.nexus.files.ui.theme.LocalNexusExtra.current.canvas
 
-        // Back: leave folders before leaving the app.
+        // Back: close overlays, then leave folders before leaving the app.
         val inSubFolder = tab == NexusTab.FILES &&
             files.currentDir != null &&
             files.currentDir!!.absolutePath != viewModel.filesRepo.root.absolutePath
-        BackHandler(enabled = inSubFolder || inspectorEntry != null || showThemeSheet) {
+        BackHandler(enabled = searchOpen || inSubFolder || inspectorEntry != null || showThemeSheet) {
             when {
+                searchOpen -> { searchOpen = false; viewModel.clearSearch() }
                 inspectorEntry != null -> inspectorEntry = null
                 showThemeSheet -> showThemeSheet = false
                 else -> viewModel.goUp()
             }
+        }
+
+        if (searchOpen) {
+            SearchScreen(
+                query = search.query,
+                results = search.results,
+                searching = search.searching,
+                searched = search.query.isNotBlank(),
+                onQueryChange = { viewModel.search(it) },
+                onOpen = { entry ->
+                    searchOpen = false
+                    viewModel.clearSearch()
+                    tab = NexusTab.FILES
+                    if (entry.isDirectory) viewModel.openDirectory(entry.file) else viewModel.open(entry)
+                },
+                onBack = { searchOpen = false; viewModel.clearSearch() },
+            )
+            return@NexusTheme
         }
 
         Column(
@@ -90,20 +135,20 @@ fun NexusApp(viewModel: MainViewModel) {
                 .background(canvas),
         ) {
             when (tab) {
-                NexusTab.OVERVIEW -> CommonTopBar(
+                NexusTab.OVERVIEW -> NexusTopBar(
                     contextChip = null,
                     onMenu = { tab = NexusTab.FILES },
                     onSettings = { showThemeSheet = true },
                     onTheme = { showThemeSheet = true },
                 )
                 NexusTab.FILES -> {}
-                NexusTab.CLEAN -> CommonTopBar(
+                NexusTab.CLEAN -> NexusTopBar(
                     contextChip = "Cleaner",
                     onMenu = { tab = NexusTab.OVERVIEW },
                     onSettings = { showThemeSheet = true },
                     onTheme = { showThemeSheet = true },
                 )
-                NexusTab.VAULT -> CommonTopBar(
+                NexusTab.VAULT -> NexusTopBar(
                     contextChip = "AES-256",
                     onMenu = { tab = NexusTab.OVERVIEW },
                     onSettings = { showThemeSheet = true },
@@ -126,7 +171,7 @@ fun NexusApp(viewModel: MainViewModel) {
                     NexusTab.OVERVIEW -> OverviewScreen(
                         overviewState = overview,
                         onOpenFile = { viewModel.open(it) },
-                        onSearch = { tab = NexusTab.FILES },
+                        onSearch = { searchOpen = true },
                         onQuickAccess = { filter ->
                             viewModel.setFilter(filter)
                             tab = NexusTab.FILES
@@ -164,7 +209,7 @@ fun NexusApp(viewModel: MainViewModel) {
                             viewModel.clearSelection()
                         },
                         onNew = { showNewFolder = true },
-                        onSearch = { viewModel.notify("Search is wired to the overview capsule") },
+                        onSearch = { searchOpen = true },
                     )
                     NexusTab.CLEAN -> CleanScreen(
                         report = clean.report,
@@ -172,6 +217,9 @@ fun NexusApp(viewModel: MainViewModel) {
                         progress = clean.scanProgress,
                         selectedLarge = clean.selectedLarge,
                         boosted = clean.boosted,
+                        overviewStats = overview.stats,
+                        autoCleanScheduled = clean.autoCleanScheduled,
+                        nextCleanAt = clean.nextCleanAt,
                         onBoost = { viewModel.oneTapBoost() },
                         onCleanCache = { viewModel.cleanCache() },
                         onCleanDuplicates = { viewModel.deleteDuplicateCopies() },
@@ -181,30 +229,23 @@ fun NexusApp(viewModel: MainViewModel) {
                         onDeselectAll = { viewModel.deselectLarge() },
                         onDeleteApks = { viewModel.deleteApks() },
                         onDeleteScreens = { viewModel.deleteOldScreens() },
+                        onAutoClean = { viewModel.setAutoClean(it) },
                     )
                     NexusTab.VAULT -> VaultScreen(
                         entries = vault.entries,
                         categoryStats = vault.categoryStats,
                         unlocked = vault.unlocked,
-                        failedTries = if (vault.unlocked) 0 else 4,
-                        onSelectEntry = { entry ->
-                            if (!vault.unlocked) {
-                                pinMode = if (vault.hasPin) PinMode.ENTER else PinMode.SETUP
-                            } else {
-                                viewModel.selectVaultEntry(entry)
-                                inspectorEntry = entry
-                            }
-                        },
-                        onUnlock = {
-                            pinMode = if (vault.hasPin) PinMode.ENTER else PinMode.SETUP
-                        },
+                        failedAttempts = vault.failedAttempts,
+                        keyAttestation = vault.keyAttestation,
+                        onSelectEntry = { entry -> requestVaultOpen(viewModel, vault, entry, pending = { pendingVaultEntry = it }, pin = { pinMode = it }, open = { inspectorEntry = it }) },
+                        onUnlock = { requestVaultOpen(viewModel, vault, null, pending = { pendingVaultEntry = it }, pin = { pinMode = it }, open = { inspectorEntry = it }) },
                         onCategory = { viewModel.notify("Partition: ${it.title}") },
                     )
                 }
             }
 
-            CommonToast(message = toast, onDone = { viewModel.clearToast() })
-            CommonBottomNav(selected = tab, onSelect = { tab = it })
+            NexusToast(message = toast, onDone = { viewModel.clearToast() })
+            NexusBottomNav(selected = tab, onSelect = { tab = it })
         }
 
         // File row overflow menu
@@ -280,7 +321,7 @@ fun NexusApp(viewModel: MainViewModel) {
             )
         }
 
-        // Vault PIN setup / entry
+        // Vault PIN setup / entry (real verification, real failed-attempt count)
         pinMode?.let { mode ->
             PinDialog(
                 setup = mode == PinMode.SETUP,
@@ -293,13 +334,65 @@ fun NexusApp(viewModel: MainViewModel) {
                     }
                     if (ok) {
                         viewModel.setVaultUnlocked(true)
+                        pendingVaultEntry?.let { inspectorEntry = it }
+                        pendingVaultEntry = null
                         pinMode = null
+                    } else {
+                        viewModel.recordFailedAttempt()
                     }
                     ok
                 },
-                onDismiss = { pinMode = null },
+                onDismiss = { pinMode = null; pendingVaultEntry = null },
             )
         }
+    }
+}
+
+/**
+ * Real gatekeeping for the vault: unlock first if needed, then (when the
+ * user has enabled it) demand a fresh biometric / credential check before
+ * the inspector can open. Falls back to the vault PIN when the device has
+ * no biometrics or screen-lock credential enrolled.
+ */
+private fun requestVaultOpen(
+    viewModel: MainViewModel,
+    state: VaultUiState,
+    entry: VaultEntry?,
+    pending: (VaultEntry?) -> Unit,
+    pin: (PinMode) -> Unit,
+    open: (VaultEntry?) -> Unit,
+) {
+    fun proceed() {
+        if (entry != null) {
+            viewModel.selectVaultEntry(entry)
+            open(entry)
+        } else {
+            viewModel.setVaultUnlocked(true)
+        }
+    }
+
+    when {
+        !state.unlocked -> {
+            pending(entry)
+            pin(if (state.hasPin) PinMode.ENTER else PinMode.SETUP)
+        }
+        entry != null && state.biometricReauth -> {
+            authenticate(
+                context = viewModel.context(),
+                title = "Confirm it's you",
+                subtitle = "Biometric re-authentication to inspect ${entry.displayName}",
+                onSuccess = { proceed() },
+                onFailure = {
+                    viewModel.recordFailedAttempt()
+                    viewModel.notify("Authentication failed")
+                },
+                onPinFallback = {
+                    pending(entry)
+                    pin(if (state.hasPin) PinMode.ENTER else PinMode.SETUP)
+                },
+            )
+        }
+        else -> proceed()
     }
 }
 

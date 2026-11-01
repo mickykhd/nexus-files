@@ -237,11 +237,12 @@ fun FilesScreen(
     }
 }
 
-private fun folderTag(entry: FileEntry): String = when {
-    entry.name.contains("camera", true) -> "DCIM"
-    entry.name.contains("backup", true) || entry.name.contains("compress", true) -> "Archived"
-    entry.name.contains("document", true) -> "Internal"
-    else -> "Internal"
+private fun folderTag(entry: FileEntry): String {
+    // Real location tag: "Internal" for root-level folders, the real parent
+    // name for anything nested (e.g. DCIM for DCIM/Camera).
+    val root = android.os.Environment.getExternalStorageDirectory()
+    val parent = entry.file.parentFile ?: return "Internal"
+    return if (parent.absolutePath == root.absolutePath) "Internal" else parent.name
 }
 
 @Composable

@@ -10,16 +10,20 @@ import com.nexus.files.data.CleanerRepository
 import com.nexus.files.data.FileEntry
 import com.nexus.files.data.FileFilter
 import com.nexus.files.data.FileRepository
+import com.nexus.files.data.Formats
+import com.nexus.files.data.OverviewData
 import com.nexus.files.data.SortOrder
-import com.nexus.files.data.StorageStats
+import com.nexus.files.data.StorageVolumeInfo
 import com.nexus.files.data.VaultCategory
 import com.nexus.files.data.VaultEntry
 import com.nexus.files.data.VaultRepository
 import com.nexus.files.data.SettingsRepository
+import com.nexus.files.work.CleanWorker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -41,11 +45,18 @@ data class FilesUiState(
 )
 
 data class OverviewUiState(
-    val stats: StorageStats? = null,
+    val stats: com.nexus.files.data.StorageStats? = null,
+    val volumes: List<StorageVolumeInfo> = emptyList(),
     val recent: List<FileEntry> = emptyList(),
     val fileCount: Int = 0,
     val quickCounts: Map<com.nexus.files.data.FileKind, Int> = emptyMap(),
     val loading: Boolean = true,
+)
+
+data class SearchUiState(
+    val query: String = "",
+    val results: List<FileEntry> = emptyList(),
+    val searching: Boolean = false,
 )
 
 data class CleanUiState(
@@ -55,6 +66,8 @@ data class CleanUiState(
     val selectedLarge: Set<String> = emptySet(),
     val cleanedBytes: Long = 0L,
     val boosted: Boolean = false,
+    val autoCleanScheduled: Boolean = false,
+    val nextCleanAt: Long? = null,
 )
 
 data class VaultUiState(
@@ -63,8 +76,10 @@ data class VaultUiState(
     val selection: Set<String> = emptySet(),
     val unlocked: Boolean = false,
     val hasPin: Boolean = false,
+    val failedAttempts: Int = 0,
     val autoDestruct: Boolean = true,
     val biometricReauth: Boolean = true,
+    val keyAttestation: String = "TEE Key",
     val busy: Boolean = false,
 )
 
@@ -80,8 +95,14 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     private val _appearance = MutableStateFlow(AppearanceSettings())
     val appearance: StateFlow<AppearanceSettings> = _appearance.asStateFlow()
 
+    private val _storageAccess = MutableStateFlow(fileRepo.hasStorageAccess())
+    val storageAccess: StateFlow<Boolean> = _storageAccess.asStateFlow()
+
     private val _overview = MutableStateFlow(OverviewUiState())
     val overview: StateFlow<OverviewUiState> = _overview.asStateFlow()
+
+    private val _search = MutableStateFlow(SearchUiState())
+    val search: StateFlow<SearchUiState> = _search.asStateFlow()
 
     private val _files = MutableStateFlow(FilesUiState(currentDir = fileRepo.root))
     val files: StateFlow<FilesUiState> = _files.asStateFlow()
@@ -89,7 +110,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     private val _clean = MutableStateFlow(CleanUiState())
     val clean: StateFlow<CleanUiState> = _clean.asStateFlow()
 
-    private val _vault = MutableStateFlow(VaultUiState())
+    private val _vault = MutableStateFlow(VaultUiState(keyAttestation = vaultRepo.keyAttestation()))
     val vault: StateFlow<VaultUiState> = _vault.asStateFlow()
 
     private val _toast = MutableStateFlow<String?>(null)
@@ -108,10 +129,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch {
             settingsRepo.biometricReauth.collect { v -> _vault.update { it.copy(biometricReauth = v) } }
         }
-        refreshOverview()
-        openDirectory(fileRepo.root)
-        refreshCleaner()
-        refreshVault()
+        refreshScheduleState()
+        refreshAll()
     }
 
     fun notify(message: String) {
@@ -122,6 +141,30 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         _toast.value = null
     }
 
+    /** Re-checks storage access (called whenever the app returns to foreground). */
+    fun refreshPermissions() {
+        val granted = fileRepo.hasStorageAccess()
+        val changed = granted != _storageAccess.value
+        _storageAccess.value = granted
+        if (granted && changed) refreshAll()
+    }
+
+    fun storageAccessIntent() = fileRepo.storageAccessIntent()
+    fun needsLegacyPermissions() = fileRepo.needsLegacyPermissions()
+    fun legacyPermissions() = fileRepo.legacyPermissions()
+
+    fun refreshAll() {
+        if (!_storageAccess.value) {
+            _overview.update { it.copy(loading = false) }
+            _clean.update { it.copy(scanning = false) }
+            return
+        }
+        refreshOverview()
+        openDirectory(_files.value.currentDir ?: fileRepo.root)
+        refreshCleaner()
+        refreshVault()
+    }
+
     // ---------------- Appearance ----------------
 
     fun applyAppearance(settings: AppearanceSettings) {
@@ -129,23 +172,38 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch { settingsRepo.saveAppearance(settings) }
     }
 
-    // ---------------- Overview ----------------
+    // ---------------- Overview & search ----------------
 
     fun refreshOverview() {
         viewModelScope.launch {
             _overview.update { it.copy(loading = true) }
-            val stats = withContext(Dispatchers.IO) { fileRepo.storageStats() }
-            val recent = withContext(Dispatchers.IO) { fileRepo.recentFiles(14) }
-            val count = withContext(Dispatchers.IO) { fileRepo.totalFileCount() }
-            val quick = withContext(Dispatchers.IO) { fileRepo.quickAccessCounts() }
+            val data = withContext(Dispatchers.IO) { fileRepo.overviewData() }
+            val volumes = withContext(Dispatchers.IO) { fileRepo.volumes() }
             _overview.value = OverviewUiState(
-                stats = stats,
-                recent = recent,
-                fileCount = count,
-                quickCounts = quick,
+                stats = data.stats,
+                volumes = volumes,
+                recent = data.recent,
+                fileCount = data.totalFiles,
+                quickCounts = data.counts,
                 loading = false,
             )
         }
+    }
+
+    fun search(query: String) {
+        _search.update { it.copy(query = query, searching = query.isNotBlank()) }
+        if (query.isBlank()) {
+            _search.value = SearchUiState()
+            return
+        }
+        viewModelScope.launch {
+            val results = withContext(Dispatchers.IO) { fileRepo.search(query) }
+            _search.update { it.copy(results = results, searching = false) }
+        }
+    }
+
+    fun clearSearch() {
+        _search.value = SearchUiState()
     }
 
     // ---------------- Files ----------------
@@ -198,11 +256,6 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun clearSelection() = _files.update { it.copy(selection = emptySet()) }
-
-    fun selectionSize(): Long = _files.value.selection.sumOf { path ->
-        val f = File(path)
-        if (f.isDirectory) f.walkTopDown().filter { it.isFile }.sumOf { it.length() } else f.length()
-    }
 
     fun deleteSelection() {
         val paths = _files.value.selection
@@ -259,7 +312,6 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch {
             _vault.update { it.copy(busy = true) }
             val source = if (entry.isDirectory) {
-                // Seal each file inside the folder
                 entry.file.walkTopDown().filter { it.isFile }.firstOrNull()
             } else entry.file
             if (source == null) {
@@ -267,10 +319,14 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                 _vault.update { it.copy(busy = false) }
                 return@launch
             }
-            withContext(Dispatchers.IO) { vaultRepo.seal(source) }
+            val deadline = if (_vault.value.autoDestruct) {
+                System.currentTimeMillis() + VaultRepository.AUTO_DESTRUCT_WINDOW_MS
+            } else null
+            withContext(Dispatchers.IO) { vaultRepo.seal(source, autoDestructAt = deadline) }
             _vault.update { it.copy(busy = false) }
             notify("${entry.name} sealed in vault")
             _files.value.currentDir?.let(::openDirectory)
+            refreshOverview()
             refreshVault()
         }
     }
@@ -307,10 +363,6 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     fun deselectLarge() = _clean.update { it.copy(selectedLarge = emptySet()) }
 
-    fun selectedLargeBytes(): Long =
-        _clean.value.report?.largeFiles.orEmpty().filter { it.file.absolutePath in _clean.value.selectedLarge }
-            .sumOf { it.size }
-
     fun cleanCache() {
         viewModelScope.launch {
             val report = _clean.value.report ?: return@launch
@@ -319,7 +371,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                 report.cacheBytes
             }
             _clean.update { it.copy(cleanedBytes = it.cleanedBytes + freed, boosted = true) }
-            notify("Cache purged — ${com.nexus.files.data.Formats.size(freed)} reclaimed")
+            notify("Cache purged — ${Formats.size(freed)} reclaimed")
             refreshCleaner()
             refreshOverview()
         }
@@ -344,7 +396,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             val freed = targets.sumOf { it.size }
             withContext(Dispatchers.IO) { cleanRepo.deleteAll(targets) }
             _clean.update { it.copy(cleanedBytes = it.cleanedBytes + freed, selectedLarge = emptySet(), boosted = true) }
-            notify("Large files deleted — ${com.nexus.files.data.Formats.size(freed)} reclaimed")
+            notify("Large files deleted — ${Formats.size(freed)} reclaimed")
             refreshCleaner()
             refreshOverview()
         }
@@ -384,9 +436,34 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                 cleanRepo.deleteAll(report.apkFiles)
             }
             _clean.update { it.copy(cleanedBytes = it.cleanedBytes + freed, boosted = true) }
-            notify("Boost complete — ${com.nexus.files.data.Formats.size(freed)} reclaimed")
+            notify("Boost complete — ${Formats.size(freed)} reclaimed")
             refreshCleaner()
             refreshOverview()
+        }
+    }
+
+    // ---------------- Scheduled deep clean ----------------
+
+    fun setAutoClean(enabled: Boolean) {
+        viewModelScope.launch {
+            if (enabled) {
+                val next = withContext(Dispatchers.IO) { CleanWorker.schedule(getApplication()) }
+                _clean.update { it.copy(autoCleanScheduled = true, nextCleanAt = next) }
+                notify("Weekly auto-clean scheduled")
+            } else {
+                withContext(Dispatchers.IO) { CleanWorker.cancel(getApplication()) }
+                _clean.update { it.copy(autoCleanScheduled = false, nextCleanAt = null) }
+                notify("Auto-clean disabled")
+            }
+        }
+    }
+
+    private fun refreshScheduleState() {
+        viewModelScope.launch {
+            val scheduled = withContext(Dispatchers.IO) { CleanWorker.isScheduled(getApplication()) }
+            _clean.update {
+                it.copy(autoCleanScheduled = scheduled, nextCleanAt = if (scheduled) CleanWorker.nextRunAt() else null)
+            }
         }
     }
 
@@ -394,6 +471,11 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     fun refreshVault() {
         viewModelScope.launch {
+            val purged = withContext(Dispatchers.IO) {
+                val n = vaultRepo.purgeExpired()
+                if (n > 0) notify("$n sealed artifact(s) auto-destructed")
+                n
+            }
             val entries = withContext(Dispatchers.IO) { vaultRepo.entries() }
             val stats = withContext(Dispatchers.IO) { vaultRepo.categoryStats() }
             _vault.update {
@@ -406,7 +488,13 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun setVaultUnlocked(value: Boolean) = _vault.update { it.copy(unlocked = value) }
+    fun setVaultUnlocked(value: Boolean) {
+        _vault.update { it.copy(unlocked = value, failedAttempts = if (value) 0 else it.failedAttempts) }
+    }
+
+    fun recordFailedAttempt() {
+        _vault.update { it.copy(failedAttempts = it.failedAttempts + 1) }
+    }
 
     fun selectVaultEntry(entry: VaultEntry?) {
         _vault.update { it.copy(selection = if (entry == null) emptySet() else setOf(entry.id)) }
@@ -439,18 +527,15 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun setAutoDestruct(value: Boolean) {
-        viewModelScope.launch { settingsRepo.setAutoDestruct(value) }
+        viewModelScope.launch {
+            settingsRepo.setAutoDestruct(value)
+            withContext(Dispatchers.IO) { vaultRepo.setAutoDestructForAll(value) }
+            refreshVault()
+        }
     }
 
     fun setBiometricReauth(value: Boolean) {
         viewModelScope.launch { settingsRepo.setBiometricReauth(value) }
-    }
-
-    fun updateVaultEntry(entry: VaultEntry) {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) { vaultRepo.update(entry) }
-            refreshVault()
-        }
     }
 
     fun setPin(pin: String) {
@@ -458,6 +543,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     suspend fun verifyPin(pin: String): Boolean = settingsRepo.verifyPin(pin)
+
+    fun hasPinSync(): Boolean = _vault.value.hasPin
 
     fun context(): Context = getApplication()
 }

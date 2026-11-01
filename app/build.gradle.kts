@@ -22,8 +22,8 @@ android {
         applicationId = "com.nexus.files"
         minSdk = 29
         targetSdk = 37
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.1.0"
     }
 
     signingConfigs {
@@ -95,6 +95,7 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.biometric)
+    implementation(libs.androidx.work.runtime)
     implementation(libs.coil.compose)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }

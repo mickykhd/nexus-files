@@ -70,7 +70,8 @@ fun VaultScreen(
     entries: List<VaultEntry>,
     categoryStats: Map<VaultCategory, Pair<Int, Long>>,
     unlocked: Boolean,
-    failedTries: Int,
+    failedAttempts: Int,
+    keyAttestation: String,
     onSelectEntry: (VaultEntry) -> Unit,
     onUnlock: () -> Unit,
     onCategory: (VaultCategory) -> Unit,
@@ -97,9 +98,10 @@ fun VaultScreen(
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                     Text(
-                        "Zero-knowledge storage enclave",
+                        "Hardware-backed $keyAttestation · AES-256-GCM enclave",
                         style = MaterialTheme.typography.bodySmall,
                         fontFamily = MonoFontFamily,
+                        fontSize = 11.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
@@ -140,7 +142,7 @@ fun VaultScreen(
                     Column(Modifier.weight(1f)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                if (unlocked) "Vault Unlocked" else "Biometrics Engaged",
+                                if (unlocked) "Vault Unlocked" else "Vault Locked",
                                 style = MaterialTheme.typography.titleMedium.copy(fontSize = 15.sp),
                                 fontFamily = MonoFontFamily,
                                 fontWeight = FontWeight.W700,
@@ -150,12 +152,16 @@ fun VaultScreen(
                                 modifier = Modifier.weight(1f, fill = false),
                             )
                             Spacer(Modifier.width(8.dp))
-                            TagChip("Knox Protected", color = extra.docs, filled = true)
+                            TagChip(keyAttestation, color = extra.docs, filled = true)
                         }
                         Spacer(Modifier.height(2.dp))
+                        val total = entries.size
                         Text(
-                            if (unlocked) "Enclave mounted · AES-256-GCM active"
-                            else "Locked with Fingerprint / PIN • $failedTries failed tries left",
+                            buildString {
+                                append(if (unlocked) "Enclave mounted · " else "AES-256-GCM key locked · ")
+                                append("$total ${if (total == 1) "artifact" else "artifacts"} sealed")
+                                if (failedAttempts > 0) append(" · $failedAttempts failed ${if (failedAttempts == 1) "attempt" else "attempts"}")
+                            },
                             style = MaterialTheme.typography.bodySmall,
                             fontFamily = MonoFontFamily,
                             fontSize = 11.sp,

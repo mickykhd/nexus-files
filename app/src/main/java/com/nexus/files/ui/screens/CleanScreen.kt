@@ -63,6 +63,7 @@ import com.nexus.files.ui.components.IconSquircle
 import com.nexus.files.ui.components.LegendDot
 import com.nexus.files.ui.components.NexusCard
 import com.nexus.files.ui.components.NexusCheckbox
+import com.nexus.files.ui.components.NexusSwitch
 import com.nexus.files.ui.components.SectionHeader
 import com.nexus.files.ui.components.StorageDonut
 import com.nexus.files.ui.components.TagChip
@@ -82,6 +83,9 @@ fun CleanScreen(
     progress: Float,
     selectedLarge: Set<String>,
     boosted: Boolean,
+    overviewStats: com.nexus.files.data.StorageStats?,
+    autoCleanScheduled: Boolean,
+    nextCleanAt: Long?,
     onBoost: () -> Unit,
     onCleanCache: () -> Unit,
     onCleanDuplicates: () -> Unit,
@@ -91,6 +95,7 @@ fun CleanScreen(
     onDeselectAll: () -> Unit,
     onDeleteApks: () -> Unit,
     onDeleteScreens: () -> Unit,
+    onAutoClean: (Boolean) -> Unit,
 ) {
     val extra = LocalNexusExtra.current
     val cacheBytes = report?.cacheBytes ?: 0L
@@ -106,12 +111,28 @@ fun CleanScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item(key = "health") {
+            val usedPercent = overviewStats?.usedPercent ?: 0
+            val healthLabel = when {
+                usedPercent >= 90 -> "$usedPercent% used · Critical"
+                usedPercent >= 75 -> "$usedPercent% used · Warning"
+                else -> "$usedPercent% used · Healthy"
+            }
+            val healthColor = when {
+                usedPercent >= 90 -> extra.danger
+                usedPercent >= 75 -> extra.warning
+                else -> extra.success
+            }
             Row(
                 Modifier.padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                StatusChip(Icons.Rounded.Speed, "System Health State", extra.success, Modifier.weight(1f))
-                StatusChip(Icons.Rounded.VerifiedUser, "Optimal Performance", extra.success, Modifier.weight(1f))
+                StatusChip(Icons.Rounded.Speed, healthLabel, healthColor, Modifier.weight(1f))
+                StatusChip(
+                    Icons.Rounded.VerifiedUser,
+                    if (total <= 0) "Nothing to reclaim" else "${Formats.size(total)} reclaimable",
+                    extra.success,
+                    Modifier.weight(1f),
+                )
             }
         }
 
@@ -263,7 +284,13 @@ fun CleanScreen(
         }
 
         item(key = "smart-header") {
-            SectionHeader("Smart Cleaning Recommendations", trailing = "5 Categories Detected")
+            val categoriesWithFindings = listOf(
+                cacheBytes > 0, dupBytes > 0, largeBytes > 0, apkBytes > 0, screenBytes > 0,
+            ).count { it }
+            SectionHeader(
+                "Smart Cleaning Recommendations",
+                trailing = if (categoriesWithFindings == 0) "No clutter found" else "$categoriesWithFindings Categor${if (categoriesWithFindings == 1) "y" else "ies"} Detected",
+            )
         }
 
         // 1. App cache
@@ -329,22 +356,43 @@ fun CleanScreen(
             )
         }
 
-        // Schedule
+        // Schedule (real WorkManager state)
         item(key = "schedule") {
             NexusCard(
                 modifier = Modifier.padding(horizontal = 16.dp).enterStagger(8),
                 contentPadding = PaddingValues(18.dp),
             ) {
-                Row(verticalAlignment = Alignment.Top) {
-                    Icon(Icons.Rounded.CalendarMonth, contentDescription = null, tint = extra.success, modifier = Modifier.size(20.dp))
-                    Spacer(Modifier.width(12.dp))
-                    Text(
-                        "Deep Clean Schedule: Auto-cleaning is configured every Sunday at 3:00 AM. Stale cache files over 7 days old will be cleaned automatically.",
-                        style = MaterialTheme.typography.bodySmall,
-                        fontFamily = MonoFontFamily,
-                        lineHeight = 17.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        if (autoCleanScheduled) Icons.Rounded.CalendarMonth else Icons.Rounded.HourglassTop,
+                        contentDescription = null,
+                        tint = if (autoCleanScheduled) extra.success else MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp),
                     )
+                    Spacer(Modifier.width(12.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            if (autoCleanScheduled) "Auto-clean scheduled" else "Auto-clean is off",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontFamily = MonoFontFamily,
+                            fontWeight = FontWeight.W700,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Text(
+                            if (autoCleanScheduled && nextCleanAt != null) {
+                                "Junk older than 7 days is cleaned every Sunday · next run ${Formats.date(nextCleanAt)} at ${Formats.time(nextCleanAt)}"
+                            } else {
+                                "Turn on to clean junk older than 7 days every Sunday at 3:00 AM"
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            fontFamily = MonoFontFamily,
+                            fontSize = 11.sp,
+                            lineHeight = 16.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Spacer(Modifier.width(10.dp))
+                    NexusSwitch(checked = autoCleanScheduled, onCheckedChange = onAutoClean)
                 }
             }
         }

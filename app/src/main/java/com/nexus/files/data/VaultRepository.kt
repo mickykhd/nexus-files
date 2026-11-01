@@ -113,7 +113,11 @@ class VaultRepository(private val appContext: android.content.Context) {
         indexFile.writeText(JSONArray(entries.map { it.toJson() }).toString())
     }
 
-    suspend fun seal(file: File, category: VaultCategory? = null): VaultEntry = withContext(Dispatchers.IO) {
+    suspend fun seal(
+        file: File,
+        category: VaultCategory? = null,
+        autoDestructAt: Long? = null,
+    ): VaultEntry = withContext(Dispatchers.IO) {
         vaultDir.mkdirs()
         val id = java.util.UUID.randomUUID().toString().substring(0, 8)
         val outName = "${file.name}.$VAULT_EXT"
@@ -148,7 +152,7 @@ class VaultRepository(private val appContext: android.content.Context) {
             addedAt = System.currentTimeMillis(),
             category = category ?: VaultCategory.forFile(FileEntry.of(file)),
             hardwarePath = "${vaultDir.absolutePath}/${hexAddress(id)}",
-            autoDestructAt = null,
+            autoDestructAt = autoDestructAt,
         )
         write(entries() + entry)
         file.delete()
@@ -183,6 +187,49 @@ class VaultRepository(private val appContext: android.content.Context) {
     fun wipe(entry: VaultEntry) {
         sealedFile(entry)?.delete()
         write(entries().filterNot { it.id == entry.id })
+    }
+
+    /**
+     * Really purges artifacts whose auto-destruct deadline has passed.
+     * Returns the number of artifacts purged.
+     */
+    fun purgeExpired(): Int {
+        val now = System.currentTimeMillis()
+        val expired = entries().filter { val d = it.autoDestructAt; d != null && d < now }
+        expired.forEach { wipe(it) }
+        return expired.size
+    }
+
+    fun setAutoDestructForAll(enabled: Boolean) {
+        val deadline = System.currentTimeMillis() + AUTO_DESTRUCT_WINDOW_MS
+        write(entries().map { it.copy(autoDestructAt = if (enabled) deadline else null) })
+    }
+
+    /** Real hardware attestation of the key store backing the vault. */
+    fun keyAttestation(): String = attestation
+
+    private val attestation: String by lazy {
+        probeAttestation()
+    }
+
+    private fun probeAttestation(): String = try {
+        val generator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore")
+        val spec = KeyGenParameterSpec.Builder(
+            "nexus_probe_key",
+            KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT,
+        )
+            .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+            .setKeySize(256)
+            .setIsStrongBoxBacked(true)
+            .build()
+        generator.init(spec)
+        generator.generateKey()
+        val ks = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
+        ks.deleteEntry("nexus_probe_key")
+        "StrongBox"
+    } catch (_: Throwable) {
+        "TEE Key"
     }
 
     fun sealedFile(entry: VaultEntry): File? =
@@ -223,5 +270,6 @@ class VaultRepository(private val appContext: android.content.Context) {
     companion object {
         const val VAULT_EXT = "enc"
         const val KEY_ALIAS = "nexus_vault_key"
+        const val AUTO_DESTRUCT_WINDOW_MS = 48L * 60 * 60 * 1000
     }
 }
